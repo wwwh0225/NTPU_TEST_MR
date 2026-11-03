@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>顧客關係管理 CRM｜AI for Taiwan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6F8FB;
+    --text:#15233A;
+    --muted:#5B6B82;
+    --teal:#0FA3A3;
+    --teal-dark:#0B8383;
+    --teal-soft:#D7F5F2;
+    --amber:#F59E0B;
+    --amber-dark:#B45309;
+    --amber-soft:#FFE8B8;
+    --rose:#F87171;
+    --rose-soft:#FDE2E4;
+    --card:rgba(255,255,255,.78);
+    --line:rgba(21,35,58,.09);
+    --font:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+    --mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow:hidden}
+
+  /* ---------- 背景 ---------- */
+  .bg{position:fixed;inset:0;z-index:0;overflow:hidden;
+    background:radial-gradient(1100px 700px at 10% 0%,rgba(15,163,163,.14),transparent 60%),
+               radial-gradient(900px 700px at 95% 100%,rgba(245,158,11,.14),transparent 60%),
+               var(--bg);}
+
+  /* ---------- 舞台 1920×1080 ---------- */
+  .stage{position:fixed;left:50%;top:50%;width:1920px;height:1080px;transform:translate(-50%,-50%);transform-origin:center;z-index:1}
+  .slide{position:absolute;inset:0;padding:72px 110px 76px;opacity:0;visibility:hidden;transition:opacity .3s ease;display:flex;flex-direction:column}
+  .slide.active{opacity:1;visibility:visible}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}}
+
+  /* ---------- 文字 ---------- */
+  h1{font-size:128px;font-weight:900;line-height:1.05;letter-spacing:-.01em}
+  h2{font-size:64px;font-weight:900;line-height:1.15;letter-spacing:-.01em}
+  h2 small{display:block;font-size:28px;font-weight:400;color:var(--muted);margin-top:12px;line-height:1.5}
+  h3{font-size:32px;font-weight:700;margin-bottom:14px;line-height:1.3}
+  p,li{font-size:28px;line-height:1.6}
+  .muted{color:var(--muted)}
+  .teal{color:var(--teal-dark)} .amber{color:var(--amber-dark)} .rose{color:#DC2626}
+  strong,b{color:var(--amber-dark);font-weight:700}
+
+  /* 標題列：左標題、右插圖 */
+  .head{display:flex;justify-content:space-between;align-items:flex-start;gap:40px;margin-bottom:36px;flex:0 0 auto}
+  .head h2{flex:1}
+  .ill{flex:0 0 auto;width:170px;height:170px}
+  .ill.lg{width:420px;height:420px}
+  .chapter{position:absolute;top:34px;left:110px;font-size:20px;color:var(--muted);letter-spacing:.06em;display:flex;align-items:center;gap:12px}
+  .chapter i{display:inline-block;width:28px;height:3px;border-radius:2px;background:var(--teal)}
+
+  /* ---------- 卡片 ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:26px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    box-shadow:0 12px 40px rgba(21,35,58,.06);padding:34px 38px}
+  .card.tight{padding:26px 30px;border-radius:22px}
+  .card.teal-bg{background:linear-gradient(135deg,rgba(215,245,242,.95),rgba(255,255,255,.85))}
+  .card.amber-bg{background:linear-gradient(135deg,rgba(255,232,184,.9),rgba(255,255,255,.85))}
+
+  .row{display:flex;gap:30px;flex:1;min-height:0}
+  .col{display:flex;flex-direction:column;gap:30px;flex:1;min-height:0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:30px;flex:1;min-height:0}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;flex:1;min-height:0}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;flex:1;min-height:0}
+  .fill{flex:1;min-height:0}
+
+  ul.clean{list-style:none}
+  ul.clean li{position:relative;padding-left:30px;font-size:26px;line-height:1.5;margin-bottom:10px}
+  ul.clean li::before{content:"";position:absolute;left:4px;top:15px;width:11px;height:11px;border-radius:50%;background:var(--teal)}
+  ul.clean.amber li::before{background:var(--amber)}
+  ul.clean.rose li::before{background:var(--rose)}
+
+  .num{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;
+    background:var(--teal-soft);color:var(--teal-dark);font-size:28px;font-weight:900;margin-bottom:16px}
+  .num.rose{background:var(--rose-soft);color:#DC2626}
+
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:26px}
+  th,td{padding:16px 22px;text-align:left;vertical-align:top;line-height:1.45}
+  th{color:var(--muted);font-weight:500;font-size:22px;border-bottom:2px solid var(--line)}
+  td{border-bottom:1px solid var(--line)}
+  tr:last-child td{border-bottom:none}
+  td.k{color:var(--teal-dark);font-weight:700}
+  td.c,th.c{text-align:center}
+  td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
+
+  pre{font-family:var(--mono);font-size:23px;line-height:1.5;white-space:pre-wrap;word-break:break-word;color:#1F2D45;
+    background:#FFFFFF;border:1px solid var(--line);border-radius:20px;padding:28px 34px;flex:1;min-height:0;overflow:auto;
+    box-shadow:0 12px 40px rgba(21,35,58,.06)}
+  pre b{color:var(--amber-dark);font-weight:500;background:var(--amber-soft);border-radius:6px;padding:0 6px}
+  .tag{display:inline-block;font-family:var(--mono);font-size:19px;color:#fff;background:var(--teal);border-radius:999px;padding:6px 18px;margin-bottom:16px;font-weight:500}
+  .tag.warm{background:var(--amber)}
+
+  .formula{font-family:var(--mono);font-size:32px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 26px;margin:14px 0}
+  .quote{font-size:44px;font-weight:700;line-height:1.5;border-left:8px solid var(--amber);padding-left:36px}
+  img.plain{max-width:100%;max-height:100%;object-fit:contain;border-radius:18px}
+
+  /* ---------- 導覽 ---------- */
+  .progress{position:fixed;left:0;right:0;bottom:0;height:5px;background:rgba(21,35,58,.08);z-index:5}
+  .progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--amber));transition:width .3s}
+  .ctrl{position:fixed;right:24px;bottom:20px;display:flex;align-items:center;gap:8px;z-index:6}
+  .ctrl button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--text);font-size:22px;cursor:pointer;box-shadow:0 4px 14px rgba(21,35,58,.08)}
+  .ctrl button:hover{background:var(--teal-soft)}
+  .ctrl button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .counter{font-family:var(--mono);font-size:14px;color:var(--muted);padding:0 8px;min-width:70px;text-align:center}
+  .hint{position:fixed;left:24px;bottom:28px;font-size:13px;color:var(--muted);z-index:6}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+
+<!-- ========== 插圖（inline SVG symbols） ========== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="il-people" viewBox="0 0 200 200">
+      <circle cx="60" cy="68" r="24" fill="#FFE8B8" stroke="#F59E0B" stroke-width="5"/>
+      <path d="M18 150c0-25 19-44 42-44s42 19 42 44" fill="#FFE8B8" stroke="#F59E0B" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="140" cy="68" r="24" fill="#D7F5F2" stroke="#0FA3A3" stroke-width="5"/>
+      <path d="M98 150c0-25 19-44 42-44s42 19 42 44" fill="#D7F5F2" stroke="#0FA3A3" stroke-width="5" stroke-linecap="round"/>
+      <path d="M100 192l-28-26c-9-9-9-24 2-31 9-6 20-3 26 5 6-8 17-11 26-5 11 7 11 22 2 31z" fill="#F87171"/>
+    </symbol>
+    <symbol id="il-magnet" viewBox="0 0 200 200">
+      <path d="M50 28V98a50 50 0 0 0 100 0V28" fill="none" stroke="#F59E0B" stroke-width="28"/>
+      <rect x="36" y="18" width="28" height="32" rx="4" fill="#0FA3A3"/>
+      <rect x="136" y="18" width="28" height="32" rx="4" fill="#0FA3A3"/>
+      <circle cx="68" cy="176" r="10" fill="#0FA3A3"/><circle cx="100" cy="186" r="10" fill="#F59E0B"/><circle cx="132" cy="176" r="10" fill="#0FA3A3"/>
+    </symbol>
+    <symbol id="il-db" viewBox="0 0 200 200">
+      <path d="M45 60v80c0 10 25 18 55 18s55-8 55-18V60" fill="#fff" stroke="#0FA3A3" stroke-width="5"/>
+      <path d="M45 100c0 10 25 18 55 18s55-8 55-18" fill="none" stroke="#0FA3A3" stroke-width="5"/>
+      <ellipse cx="100" cy="60" rx="55" ry="18" fill="#D7F5F2" stroke="#0FA3A3" stroke-width="5"/>
+      <circle cx="24" cy="28" r="9" fill="#F59E0B"/><circle cx="176" cy="28" r="9" fill="#F59E0B"/><circle cx="20" cy="172" r="9" fill="#F59E0B"/><circle cx="180" cy="172" r="9" fill="#F59E0B"/>
+    </symbol>
+    <symbol id="il-seg" viewBox="0 0 200 200">
+      <rect x="15" y="22" width="80" height="72" rx="18" fill="#D7F5F2"/>
+      <rect x="105" y="22" width="80" height="72" rx="18" fill="#FFE8B8"/>
+      <rect x="15" y="106" width="80" height="72" rx="18" fill="#FDE2E4"/>
+      <rect x="105" y="106" width="80" height="72" rx="18" fill="#E6E9F2"/>
+      <circle cx="40" cy="58" r="11" fill="#0FA3A3"/><circle cx="70" cy="58" r="11" fill="#0FA3A3"/>
+      <circle cx="130" cy="58" r="11" fill="#F59E0B"/><circle cx="160" cy="58" r="11" fill="#F59E0B"/>
+      <circle cx="40" cy="142" r="11" fill="#F87171"/><circle cx="70" cy="142" r="11" fill="#F87171"/>
+      <circle cx="145" cy="142" r="11" fill="#94A3B8"/>
+    </symbol>
+    <symbol id="il-card" viewBox="0 0 200 200">
+      <rect x="18" y="42" width="164" height="116" rx="20" fill="#fff" stroke="#0FA3A3" stroke-width="5"/>
+      <circle cx="62" cy="88" r="17" fill="#FFE8B8" stroke="#F59E0B" stroke-width="4"/>
+      <path d="M36 134c0-15 12-26 26-26s26 11 26 26" fill="#FFE8B8" stroke="#F59E0B" stroke-width="4"/>
+      <rect x="102" y="76" width="60" height="10" rx="5" fill="#0FA3A3"/>
+      <rect x="102" y="96" width="44" height="10" rx="5" fill="#CBD5E1"/>
+      <rect x="102" y="116" width="54" height="10" rx="5" fill="#CBD5E1"/>
+    </symbol>
+    <symbol id="il-time" viewBox="0 0 200 200">
+      <circle cx="100" cy="82" r="52" fill="#fff" stroke="#0FA3A3" stroke-width="5"/>
+      <path d="M100 50v34l24 14" fill="none" stroke="#F59E0B" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M20 168h160" stroke="#CBD5E1" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="40" cy="168" r="9" fill="#0FA3A3"/><circle cx="85" cy="168" r="9" fill="#0FA3A3"/><circle cx="130" cy="168" r="9" fill="#F59E0B"/><circle cx="172" cy="168" r="9" fill="#F59E0B"/>
+    </symbol>
+    <symbol id="il-rfm" viewBox="0 0 200 200" style="font-family:'Noto Sans TC',sans-serif">
+      <rect x="28" y="84" width="38" height="86" rx="9" fill="#0FA3A3"/>
+      <rect x="81" y="52" width="38" height="118" rx="9" fill="#F59E0B"/>
+      <rect x="134" y="104" width="38" height="66" rx="9" fill="#F87171"/>
+      <text x="47" y="68" text-anchor="middle" font-size="28" font-weight="900" fill="#0B8383">R</text>
+      <text x="100" y="36" text-anchor="middle" font-size="28" font-weight="900" fill="#B45309">F</text>
+      <text x="153" y="88" text-anchor="middle" font-size="28" font-weight="900" fill="#DC2626">M</text>
+      <path d="M18 172h164" stroke="#CBD5E1" stroke-width="4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="il-quint" viewBox="0 0 200 200" style="font-family:'Noto Sans TC',sans-serif">
+      <rect x="22" y="18" width="120" height="26" rx="8" fill="#0FA3A3"/>
+      <rect x="22" y="52" width="120" height="26" rx="8" fill="#3FB8B5"/>
+      <rect x="22" y="86" width="120" height="26" rx="8" fill="#6FCDC8"/>
+      <rect x="22" y="120" width="120" height="26" rx="8" fill="#9FE1DC"/>
+      <rect x="22" y="154" width="120" height="26" rx="8" fill="#CFF0ED"/>
+      <text x="166" y="39" font-size="22" font-weight="700" fill="#0B8383">5</text>
+      <text x="166" y="73" font-size="22" font-weight="700" fill="#0B8383">4</text>
+      <text x="166" y="107" font-size="22" font-weight="700" fill="#0B8383">3</text>
+      <text x="166" y="141" font-size="22" font-weight="700" fill="#0B8383">2</text>
+      <text x="166" y="175" font-size="22" font-weight="700" fill="#0B8383">1</text>
+    </symbol>
+    <symbol id="il-score" viewBox="0 0 200 200" style="font-family:'Noto Sans TC',sans-serif">
+      <circle cx="100" cy="88" r="56" fill="#FFE8B8" stroke="#F59E0B" stroke-width="6"/>
+      <text x="100" y="104" text-anchor="middle" font-size="46" font-weight="900" fill="#B45309">24</text>
+      <path d="M62 162h76" stroke="#0FA3A3" stroke-width="9" stroke-linecap="round"/>
+      <path d="M76 182h48" stroke="#0FA3A3" stroke-width="9" stroke-linecap="round" opacity=".55"/>
+    </symbol>
+    <symbol id="il-ab" viewBox="0 0 200 200" style="font-family:'Noto Sans TC',sans-serif">
+      <rect x="38" y="52" width="48" height="118" rx="10" fill="#F59E0B"/>
+      <rect x="114" y="76" width="48" height="94" rx="10" fill="#0FA3A3"/>
+      <text x="62" y="40" text-anchor="middle" font-size="28" font-weight="900" fill="#B45309">A</text>
+      <text x="138" y="64" text-anchor="middle" font-size="28" font-weight="900" fill="#0B8383">B</text>
+      <path d="M20 172h160" stroke="#CBD5E1" stroke-width="4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="il-food" viewBox="0 0 200 200">
+      <ellipse cx="100" cy="152" rx="78" ry="14" fill="#E6E9F2"/>
+      <path d="M35 140a65 65 0 0 1 130 0z" fill="#fff" stroke="#0FA3A3" stroke-width="5"/>
+      <circle cx="100" cy="72" r="9" fill="#F59E0B"/>
+      <path d="M22 140h156" stroke="#0FA3A3" stroke-width="7" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="il-stack" viewBox="0 0 200 200">
+      <rect x="14" y="28" width="112" height="82" rx="12" fill="#fff" stroke="#0FA3A3" stroke-width="5"/>
+      <path d="M14 52h112" stroke="#0FA3A3" stroke-width="5"/>
+      <circle cx="30" cy="40" r="4" fill="#F87171"/><circle cx="43" cy="40" r="4" fill="#F59E0B"/><circle cx="56" cy="40" r="4" fill="#0FA3A3"/>
+      <rect x="30" y="66" width="60" height="9" rx="4" fill="#CBD5E1"/><rect x="30" y="86" width="40" height="9" rx="4" fill="#CBD5E1"/>
+      <rect x="118" y="94" width="68" height="84" rx="12" fill="#FFE8B8" stroke="#F59E0B" stroke-width="5"/>
+      <path d="M118 122h68M118 150h68" stroke="#F59E0B" stroke-width="5"/>
+      <circle cx="134" cy="108" r="4" fill="#0FA3A3"/><circle cx="134" cy="136" r="4" fill="#0FA3A3"/><circle cx="134" cy="164" r="4" fill="#0FA3A3"/>
+    </symbol>
+    <symbol id="il-six" viewBox="0 0 200 200">
+      <rect x="18" y="38" width="48" height="48" rx="12" fill="#0FA3A3"/>
+      <rect x="76" y="38" width="48" height="48" rx="12" fill="#D7F5F2"/>
+      <rect x="134" y="38" width="48" height="48" rx="12" fill="#D7F5F2"/>
+      <rect x="18" y="114" width="48" height="48" rx="12" fill="#FFE8B8"/>
+      <rect x="76" y="114" width="48" height="48" rx="12" fill="#F59E0B"/>
+      <rect x="134" y="114" width="48" height="48" rx="12" fill="#FFE8B8"/>
+    </symbol>
+    <symbol id="il-phone" viewBox="0 0 200 200">
+      <rect x="58" y="14" width="84" height="172" rx="20" fill="#fff" stroke="#0FA3A3" stroke-width="5"/>
+      <rect x="76" y="62" width="48" height="48" fill="none" stroke="#F59E0B" stroke-width="5"/>
+      <rect x="84" y="70" width="12" height="12" fill="#F59E0B"/><rect x="104" y="70" width="12" height="12" fill="#F59E0B"/>
+      <rect x="84" y="90" width="12" height="12" fill="#F59E0B"/><rect x="104" y="90" width="12" height="12" fill="#0FA3A3"/>
+      <rect x="86" y="166" width="28" height="6" rx="3" fill="#CBD5E1"/>
+    </symbol>
+    <symbol id="il-chat" viewBox="0 0 200 200">
+      <path d="M30 40h140a14 14 0 0 1 14 14v70a14 14 0 0 1-14 14H90l-35 30v-30H30a14 14 0 0 1-14-14V54a14 14 0 0 1 14-14z" fill="#fff" stroke="#0FA3A3" stroke-width="5" stroke-linejoin="round"/>
+      <rect x="40" y="66" width="90" height="10" rx="5" fill="#CBD5E1"/>
+      <rect x="40" y="88" width="110" height="10" rx="5" fill="#CBD5E1"/>
+      <rect x="40" y="110" width="62" height="10" rx="5" fill="#0FA3A3"/>
+      <path d="M162 12l6 14 14 6-14 6-6 14-6-14-14-6 14-6z" fill="#F59E0B"/>
+    </symbol>
+    <symbol id="il-bug" viewBox="0 0 200 200">
+      <path d="M48 92l-22-12M48 120H18M52 150l-22 14M152 92l22-12M152 120h30M148 150l22 14" stroke="#15233A" stroke-width="5" stroke-linecap="round"/>
+      <ellipse cx="100" cy="112" rx="52" ry="60" fill="#FDE2E4" stroke="#F87171" stroke-width="5"/>
+      <path d="M100 52v120" stroke="#F87171" stroke-width="5"/>
+      <circle cx="80" cy="95" r="8" fill="#F87171"/><circle cx="120" cy="128" r="8" fill="#F87171"/><circle cx="120" cy="86" r="6" fill="#F87171"/><circle cx="80" cy="138" r="6" fill="#F87171"/>
+      <circle cx="100" cy="46" r="17" fill="#15233A"/>
+      <path d="M90 32l-8-14M110 32l8-14" stroke="#15233A" stroke-width="5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="il-trophy" viewBox="0 0 200 200">
+      <path d="M60 28h80v52a40 40 0 0 1-80 0z" fill="#FFE8B8" stroke="#F59E0B" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M60 44H34a26 26 0 0 0 26 36M140 44h26a26 26 0 0 1-26 36" fill="none" stroke="#F59E0B" stroke-width="5" stroke-linecap="round"/>
+      <path d="M100 120v32" stroke="#F59E0B" stroke-width="9"/>
+      <rect x="62" y="152" width="76" height="20" rx="7" fill="#0FA3A3"/>
+      <path d="M100 52l6 12 13 2-10 9 3 13-12-7-12 7 3-13-10-9 13-2z" fill="#F59E0B"/>
+    </symbol>
+    <symbol id="il-sprout" viewBox="0 0 200 200">
+      <path d="M58 122h84l-10 58H68z" fill="#FFE8B8" stroke="#F59E0B" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M100 122V66" stroke="#0FA3A3" stroke-width="7" stroke-linecap="round"/>
+      <path d="M100 98c-32 0-44-22-44-46 22 0 44 12 44 46z" fill="#D7F5F2" stroke="#0FA3A3" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M100 80c32 0 44-22 44-46-22 0-44 12-44 46z" fill="#D7F5F2" stroke="#0FA3A3" stroke-width="5" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="stage" id="stage">
+
+<!-- 01 封面 -->
+<section class="slide" style="justify-content:center">
+  <img src="https://ai4taiwan.org.tw/wp-content/uploads/2025/04/ai4taiwan_long.svg" alt="AI for Taiwan" style="height:76px;width:auto;object-fit:contain;align-self:flex-start;margin-bottom:56px">
+  <div class="row" style="flex:0 0 auto;align-items:center">
+    <div style="flex:1">
+      <h1>顧客關係管理<br><span class="teal">CRM</span></h1>
+      <div class="card tight" style="display:inline-flex;align-items:center;gap:24px;margin-top:64px">
+        <span class="muted" style="font-size:24px">講者</span>
+        <span style="font-size:34px;font-weight:700">黃海潮 Eric</span>
+        <span class="muted" style="font-size:24px">AI for Taiwan 副理事長</span>
+      </div>
+    </div>
+    <svg class="ill lg" style="width:520px;height:520px"><use href="#il-people"/></svg>
+  </div>
+</section>
+
+<!-- 02 為什麼 -->
+<section class="slide" style="justify-content:center">
+  <div class="chapter"><i></i>為什麼要有顧客關係管理</div>
+  <div class="row" style="flex:0 0 auto;align-items:center;gap:60px">
+    <div style="flex:1">
+      <h2 style="margin-bottom:40px">為什麼要有顧客關係管理</h2>
+      <div class="card amber-bg">
+        <p style="font-size:36px;line-height:1.65"><strong>留住一個舊客的成本，遠低於開發一個新客</strong>。而且舊客會回購、客單價更高、還會推薦別人。企業的利潤大部分來自少數忠誠顧客，而不是一次性的過路客。</p>
+        <p style="font-size:36px;line-height:1.65;margin-top:22px">CRM 就是把這群人<span class="teal" style="font-weight:700">找出來、留下來、經營好</span>的系統性做法。</p>
+      </div>
+    </div>
+    <svg class="ill lg"><use href="#il-magnet"/></svg>
+  </div>
+</section>
+
+<!-- 03 為什麼 1-3 -->
+<section class="slide">
+  <div class="chapter"><i></i>為什麼要有顧客關係管理</div>
+  <div class="head"><h2>為什麼要有顧客關係管理</h2><svg class="ill"><use href="#il-db"/></svg></div>
+  <div class="grid3">
+    <div class="card">
+      <div class="num">1</div>
+      <h3>把顧客資料集中，不再散落各處</h3>
+      <p style="font-size:25px">沒有 CRM 的時候，顧客資訊在業務的 Excel、客服的 email、老闆的腦袋裡。人一離職，關係就跟著走了。CRM 讓每一次互動（詢價、購買、客訴、拜訪）都記錄在同一個地方，任何人接手都能看到完整歷史。</p>
+    </div>
+    <div class="card">
+      <div class="num">2</div>
+      <h3>不用把所有顧客當成同一種人</h3>
+      <p style="font-size:25px">透過消費頻率、金額、最近一次購買（RFM）等資料，可以區分出高價值客、潛力客、流失中的客，針對不同群體給不同的對待。對 VIP 給專屬服務，對快流失的客發挽回優惠，對不會再買的人就不要再浪費行銷預算。</p>
+    </div>
+    <div class="card">
+      <div class="num">3</div>
+      <h3>提升回購率與終身價值</h3>
+      <p style="font-size:25px">記得顧客上次買什麼、偏好什麼，就能在對的時間推薦對的東西。生日優惠、耗材到期提醒、相關商品推薦，這些都需要「記得這個人」才做得到。顧客感覺被認得，就更願意回來。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 04 為什麼 4-7 -->
+<section class="slide">
+  <div class="chapter"><i></i>為什麼要有顧客關係管理</div>
+  <div class="head"><h2>為什麼要有顧客關係管理</h2><svg class="ill"><use href="#il-seg"/></svg></div>
+  <div class="grid2">
+    <div class="card tight"><div class="num">4</div><h3>讓業務流程看得見、管得到</h3>
+      <p style="font-size:25px">從潛在客戶到成交的每個階段，進度、卡在哪裡、預估金額都在系統裡。主管不用靠問才知道狀況，業務也不會漏追客戶。預測營收時，也有依據而不是憑感覺。</p></div>
+    <div class="card tight"><div class="num">5</div><h3>客服更快、更一致</h3>
+      <p style="font-size:25px">客人打來時，客服馬上看到他是誰、買過什麼、上次抱怨過什麼，不用讓他從頭講一次。問題處理的紀錄也能累積成知識庫，減少重複犯錯。</p></div>
+    <div class="card tight"><div class="num">6</div><h3>行銷可以衡量成效</h3>
+      <p style="font-size:25px">哪個活動帶來多少名單、多少成交、多少營收，有資料才能算投資報酬率，把預算放到有效的地方。</p></div>
+    <div class="card tight"><div class="num">7</div><h3>把經驗變成組織資產</h3>
+      <p style="font-size:25px">成功的銷售話術、常見的客訴原因、各產業客戶的特性，這些原本只存在個人經驗裡的東西，透過 CRM 的紀錄可以被分析、被複製、被傳承。</p></div>
+  </div>
+</section>
+
+<!-- 05 靜態資料 -->
+<section class="slide">
+  <div class="chapter"><i></i>顧客資料</div>
+  <div class="head"><h2>顧客的靜態基本資料<small>相對固定、不會因為每次交易而改變的屬性。描述的是「這個顧客是誰」，而不是「他做了什麼」。</small></h2><svg class="ill"><use href="#il-card"/></svg></div>
+  <div class="grid4">
+    <div class="card tight"><h3 class="teal">身份識別</h3>
+      <ul class="clean"><li>姓名、性別、出生年月日</li><li>身分證字號或會員編號（唯一識別鍵）</li><li>國籍、語言</li></ul></div>
+    <div class="card tight"><h3 class="teal">人口統計</h3>
+      <ul class="clean"><li>年齡（可由生日推算）</li><li>教育程度</li><li>職業、職稱、產業</li><li>婚姻狀況、家庭成員數、有無子女</li><li>收入區間</li></ul></div>
+    <div class="card tight"><h3 class="teal">偏好與設定</h3>
+      <ul class="clean"><li>偏好的聯絡管道與時段</li><li>行銷同意（是否願意收到 EDM、簡訊）</li><li>興趣標籤（自填的）</li></ul></div>
+    <div class="card tight"><h3 class="teal">來源與歸屬</h3>
+      <ul class="clean"><li>加入日期、加入管道（門市、官網、活動）</li><li>所屬門市、負責業務</li><li>會員等級（嚴格說是半靜態，會隨消費調整）</li></ul></div>
+  </div>
+</section>
+
+<!-- 06 動態資料 -->
+<section class="slide">
+  <div class="chapter"><i></i>顧客資料</div>
+  <div class="head"><h2>顧客的動態交易資料<small>隨時間不斷產生、累積的紀錄。描述的是「做了什麼、什麼時候做、做了多少」，每一筆都帶有時間戳記，一旦發生就不會改變，只會不斷增加。</small></h2><svg class="ill"><use href="#il-time"/></svg></div>
+  <div class="grid4">
+    <div class="card tight"><h3 class="amber">交易行為</h3>
+      <ul class="clean amber"><li>購買紀錄：日期、商品、數量、金額、折扣、付款方式</li><li>退換貨紀錄</li><li>訂單狀態的變化（下單、付款、出貨、完成、取消）</li><li>使用優惠券、點數兌換</li></ul></div>
+    <div class="card tight"><h3 class="amber">瀏覽與互動行為</h3>
+      <ul class="clean amber"><li>網站或 App 的瀏覽頁面、停留時間、點擊路徑</li><li>搜尋關鍵字</li><li>加入購物車但未結帳</li><li>收藏、按讚、分享</li><li>Email 開信、點擊連結</li><li>廣告曝光與點擊</li></ul></div>
+    <div class="card tight"><h3 class="amber">參與行為</h3>
+      <ul class="clean amber"><li>活動報名與實際出席</li><li>會員登入頻率</li><li>推薦他人、分享邀請碼</li><li>社群互動</li></ul></div>
+    <div class="card tight"><h3 class="amber">服務互動</h3>
+      <ul class="clean amber"><li>客服來電、線上客服對話紀錄</li><li>客訴內容、處理過程、結案時間</li><li>維修、保固申請</li><li>問卷回覆、評論與評分</li></ul></div>
+  </div>
+</section>
+
+<!-- 07 RFM 模型 -->
+<section class="slide">
+  <div class="chapter"><i></i>RFM 模型</div>
+  <div class="head"><h2>RFM 模型</h2><svg class="ill"><use href="#il-rfm"/></svg></div>
+  <div class="row">
+    <div class="card tight" style="flex:1.35">
+      <table>
+        <thead><tr><th>指標</th><th>問題</th><th>計算</th><th>代表意義</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Recency<br><span class="muted" style="font-size:21px;font-weight:400">最近性</span></td><td>上次買是多久以前？</td><td>分析基準日 − 該顧客最後一次購買日</td><td>數字越小越好。剛買過的人記憶猶新、關係還熱</td></tr>
+          <tr><td class="k">Frequency<br><span class="muted" style="font-size:21px;font-weight:400">頻率</span></td><td>一段期間內買了幾次？</td><td>期間內的訂單數（或購買天數）</td><td>數字越大越好。反映忠誠度與習慣</td></tr>
+          <tr><td class="k">Monetary<br><span class="muted" style="font-size:21px;font-weight:400">金額</span></td><td>一段期間內花了多少？</td><td>期間內的總消費金額（或平均客單價）</td><td>數字越大越好。反映貢獻度與購買力</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card tight" style="flex:1;display:flex;align-items:center;justify-content:center">
+      <img class="plain" src="https://frankchiu.io/wp-content/uploads/2026/05/scimg3qzWR1.webp" alt="RFM 示意圖">
+    </div>
+  </div>
+</section>
+
+<!-- 08 五等均分法 -->
+<section class="slide">
+  <div class="chapter"><i></i>RFM 模型</div>
+  <div class="head"><h2>RFM 模型 — 五等均分法<small>每個指標各自排序後切成五等分，給 1 到 5 分。</small></h2><svg class="ill"><use href="#il-quint"/></svg></div>
+  <div class="row">
+    <div class="card fill">
+      <ul class="clean" style="margin-top:6px">
+        <li style="font-size:30px"><span class="teal" style="font-weight:700">Recency</span>：天數越少分數越高（最近買的給 5）</li>
+        <li style="font-size:30px"><span class="teal" style="font-weight:700">Frequency</span>：次數越多分數越高</li>
+        <li style="font-size:30px"><span class="teal" style="font-weight:700">Monetary</span>：金額越多分數越高</li>
+      </ul>
+      <p style="font-size:26px;margin-top:28px" class="muted">三個分數串起來就是一個三位數代碼，例如 R=5、F=4、M=5 就是「545」。五分位法最多有 <span class="amber" style="font-weight:700">125</span> 種組合。</p>
+    </div>
+    <div class="card amber-bg fill">
+      <h3 class="amber">注意：Frequency 常常切不開</h3>
+      <p style="font-size:26px">Frequency 常有大量相同值（例如很多人只買 1 次），用五分位會切不開，可以改用固定門檻：</p>
+      <div class="formula" style="font-size:26px">1 次 = 1 分、2 次 = 2 分、3–4 次 = 3 分……</div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 Bob Stone 計分 -->
+<section class="slide">
+  <div class="chapter"><i></i>RFM 模型</div>
+  <div class="head"><h2>一定要用五等均分嗎？<small>Bob Stone 在《Successful Direct Marketing Methods》提出的 RFM 計分範例：三個指標各自換算成點數後加總成總分。</small></h2><svg class="ill"><use href="#il-score"/></svg></div>
+  <div class="row">
+    <div class="card tight" style="flex:1">
+      <h3 class="teal">最近性 Recency</h3>
+      <p class="muted" style="font-size:22px;margin-bottom:8px">依最後一次購買距今的時間給分</p>
+      <table>
+        <thead><tr><th>最後一次購買</th><th class="r">點數</th></tr></thead>
+        <tbody>
+          <tr><td>3 個月內</td><td class="r amber" style="font-weight:700">24 分</td></tr>
+          <tr><td>3 到 6 個月</td><td class="r">12 分</td></tr>
+          <tr><td>6 到 9 個月</td><td class="r">6 分</td></tr>
+          <tr><td>9 到 12 個月</td><td class="r">3 分</td></tr>
+          <tr><td>超過 12 個月</td><td class="r">0 分</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col" style="flex:1">
+      <div class="card tight fill"><h3 class="teal">購買頻率 Frequency</h3><p class="muted" style="font-size:22px">每購買一次給 4 分，無上限</p><div class="formula">F = 購買次數 × 4</div></div>
+      <div class="card tight fill"><h3 class="teal">購買金額 Monetary</h3><p class="muted" style="font-size:22px">購買金額的 10%，上限 9 分</p><div class="formula">M = min(購買金額 × 10%, 9)</div></div>
+      <div class="card amber-bg tight"><div class="formula" style="margin:0;font-size:36px;text-align:center;border-color:rgba(245,158,11,.4)">RFM 總分 = R + F + M</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 範例與設計邏輯 -->
+<section class="slide">
+  <div class="chapter"><i></i>RFM 模型</div>
+  <div class="head" style="margin-bottom:24px"><h2>一定要用五等均分嗎？— 範例</h2><svg class="ill" style="width:140px;height:140px"><use href="#il-ab"/></svg></div>
+  <div class="row">
+    <div class="col" style="flex:1.1">
+      <div class="card tight">
+        <table>
+          <thead><tr><th>顧客</th><th>最後購買</th><th>購買次數</th><th>總金額</th><th class="c">R</th><th class="c">F</th><th class="c">M</th><th class="c">總分</th></tr></thead>
+          <tbody>
+            <tr><td class="k">A</td><td>2 個月前</td><td>3 次</td><td>$60</td><td class="c">24</td><td class="c">12</td><td class="c">6</td><td class="c amber" style="font-weight:900;font-size:30px">42</td></tr>
+            <tr><td class="k">B</td><td>10 個月前</td><td>6 次</td><td>$200</td><td class="c">3</td><td class="c">24</td><td class="c">9</td><td class="c" style="font-weight:900;font-size:30px">36</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:24px;margin-top:14px" class="muted">顧客 B 買得更多次、花得更多，總分卻較低，因為 <span class="amber" style="font-weight:700">Recency 的權重刻意設得最重</span>。</p>
+      </div>
+      <div class="card tight fill">
+        <h3 class="teal">設計邏輯</h3>
+        <ul class="clean">
+          <li style="font-size:24px"><b>Recency 權重最高</b>：3 個月內就有 24 分，反映「剛買過的人最可能再買」</li>
+          <li style="font-size:24px"><b>Recency 對半遞減</b>：24 → 12 → 6 → 3，每隔一季打對折，模擬顧客熱度隨時間冷卻</li>
+          <li style="font-size:24px"><b>Frequency 線性累加</b>：每次 4 分、無上限</li>
+          <li style="font-size:24px"><b>Monetary 設上限</b>：避免一次性大額顧客把分數衝到最高</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card amber-bg" style="flex:.9">
+      <h3 class="amber">注意事項</h3>
+      <ul class="clean amber">
+        <li>這組數字是為美國型錄郵購業設計，金額單位是美元，套用到其他產業與幣別必須重新校準</li>
+        <li>分析期間、Recency 級距、每次幾分、金額上限，都應依自身產業的購買週期與客單價調整</li>
+        <li><b>精神比數字重要</b>：用點數加總把三個指標合成一個排序依據，並讓 Recency 主導</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 11 前端後端比喻 -->
+<section class="slide">
+  <div class="chapter"><i></i>建構一個基礎的會員系統</div>
+  <div class="head"><h2>建構一個基礎的會員系統<small>前端與後端 — 一個比喻：餐廳</small></h2><svg class="ill lg" style="width:260px;height:260px"><use href="#il-food"/></svg></div>
+  <div class="grid2">
+    <div class="card teal-bg">
+      <h3 style="font-size:44px">前端 <span class="muted" style="font-size:26px;font-weight:400">= 餐廳的用餐區</span></h3>
+      <p style="font-size:32px;margin-top:18px">菜單、桌椅、裝潢、服務生。<br>顧客<span class="teal" style="font-weight:700">看得到、摸得到、直接互動</span>的部分。</p>
+    </div>
+    <div class="card amber-bg">
+      <h3 style="font-size:44px">後端 <span class="muted" style="font-size:26px;font-weight:400">= 廚房與倉庫</span></h3>
+      <p style="font-size:32px;margin-top:18px">接單、烹調、備料、庫存管理。<br>顧客看不到，但<span class="amber" style="font-weight:700">沒有它什麼都端不出來</span>。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 12 前端 vs 後端 -->
+<section class="slide">
+  <div class="chapter"><i></i>建構一個基礎的會員系統</div>
+  <div class="head" style="margin-bottom:24px"><h2>前端（Frontend）與 後端（Backend）</h2><svg class="ill" style="width:130px;height:130px"><use href="#il-stack"/></svg></div>
+  <div class="grid2">
+    <div class="card tight">
+      <h3 class="teal" style="font-size:34px">前端 Frontend</h3>
+      <p style="font-size:22px" class="muted">在使用者裝置上執行、使用者直接看到與操作的部分。執行位置：瀏覽器（網頁）或手機 App</p>
+      <div class="row" style="gap:22px;margin-top:14px">
+        <div style="flex:1"><p style="font-size:23px;font-weight:700;margin-bottom:6px">負責的事</p>
+          <ul class="clean"><li style="font-size:22px">畫面呈現：排版、顏色、字體、動畫</li><li style="font-size:22px">使用者互動：點按鈕、填表單、拖曳、捲動</li><li style="font-size:22px">把操作轉成請求送給後端，再把回傳資料顯示出來</li><li style="font-size:22px">基本的輸入檢查（例如 email 格式）</li></ul></div>
+        <div style="flex:1"><p style="font-size:23px;font-weight:700;margin-bottom:6px">核心技術</p>
+          <ul class="clean"><li style="font-size:22px"><b>HTML</b>：結構，頁面上有什麼</li><li style="font-size:22px"><b>CSS</b>：樣式，長什麼樣</li><li style="font-size:22px"><b>JavaScript</b>：行為，點了會發生什麼</li><li style="font-size:22px">框架：React、Vue、Angular、Svelte</li></ul></div>
+      </div>
+    </div>
+    <div class="card tight">
+      <h3 class="amber" style="font-size:34px">後端 Backend</h3>
+      <p style="font-size:22px" class="muted">在伺服器上執行、使用者看不到，負責處理邏輯與資料的部分。執行位置：伺服器（可能是雲端的機器）</p>
+      <div class="row" style="gap:22px;margin-top:14px">
+        <div style="flex:1"><p style="font-size:23px;font-weight:700;margin-bottom:6px">負責的事</p>
+          <ul class="clean amber"><li style="font-size:22px">商業邏輯：計算價格、判斷權限、執行流程</li><li style="font-size:22px">資料庫存取：新增、查詢、修改、刪除資料</li><li style="font-size:22px">身份驗證與授權：你是誰、你能做什麼</li><li style="font-size:22px">安全性：密碼加密、防止惡意請求</li><li style="font-size:22px">第三方服務串接：金流、簡訊、地圖 API</li></ul></div>
+        <div style="flex:1"><p style="font-size:23px;font-weight:700;margin-bottom:6px">核心技術</p>
+          <ul class="clean amber"><li style="font-size:22px">語言：Python、Java、Node.js、Go、C#、PHP</li><li style="font-size:22px">框架：Django、FastAPI、Spring、Express</li><li style="font-size:22px">資料庫：MySQL、PostgreSQL、MongoDB</li><li style="font-size:22px">伺服器與部署：Linux、Docker、雲端平台</li></ul></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 六個核心要素 -->
+<section class="slide">
+  <div class="chapter"><i></i>建構一個基礎的會員系統</div>
+  <div class="head"><h2>CRM 系統的六個核心要素</h2><svg class="ill"><use href="#il-six"/></svg></div>
+  <div class="card tight fill">
+    <table style="font-size:27px">
+      <thead><tr><th style="width:24%">要素</th><th>在做什麼</th><th style="width:27%">對應到今天的系統</th></tr></thead>
+      <tbody>
+        <tr><td class="k">1. 顧客主檔</td><td>每位顧客唯一 ID 與基本屬性，是所有資料關聯的中心</td><td class="amber" style="font-weight:700">客戶資料檔</td></tr>
+        <tr><td class="k">2. 互動紀錄</td><td>顧客和你之間發生過的每一件事，最基本的是交易</td><td class="amber" style="font-weight:700">交易記錄檔</td></tr>
+        <tr><td class="k">3. 商品與服務主檔</td><td>讓紀錄「有名字」，才能回答「他買了什麼」</td><td class="amber" style="font-weight:700">產品資料檔</td></tr>
+        <tr><td class="k">4. 分群與標籤</td><td>把顧客分成可以採取不同行動的群，規則要能被業務人員調整</td><td class="amber" style="font-weight:700">config + customers_rfm</td></tr>
+        <tr><td class="k">5. 查詢與報表</td><td>單一顧客的全貌，以及整體與各群的比較</td><td class="amber" style="font-weight:700">顧客查詢、統計報表分頁</td></tr>
+        <tr><td class="k">6. 行動與追蹤</td><td>把名單交給能執行的人，並記錄系統做過什麼</td><td class="amber" style="font-weight:700">名單匯出、建議行動、log 分頁</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 14 QR -->
+<section class="slide">
+  <div class="chapter"><i></i>建構一個基礎的會員系統</div>
+  <div class="head"><h2>建構一個基礎的會員系統<small>掃描取得今天的練習資料</small></h2><svg class="ill"><use href="#il-phone"/></svg></div>
+  <div class="row" style="align-items:center;justify-content:center;gap:90px">
+    <div class="card" style="background:#fff;padding:26px">
+      <img src="https://hackmd.io/_uploads/rk4Yvur6ze.png" alt="QR code" style="width:520px;height:520px;object-fit:contain;display:block">
+    </div>
+    <div>
+      <p class="muted" style="font-size:28px;margin-bottom:12px">或直接輸入網址</p>
+      <p style="font-family:var(--mono);font-size:64px;font-weight:500" class="teal">https://reurl.cc/rkWvak</p>
+    </div>
+  </div>
+</section>
+
+<!-- 15 Prompt 0 -->
+<section class="slide">
+  <div class="chapter"><i></i>建構一個基礎的會員系統</div>
+  <div class="head" style="margin-bottom:14px"><h2 style="font-size:52px">透過 AI + Google Apps Script 建立一個基本的會員系統</h2><svg class="ill" style="width:110px;height:110px"><use href="#il-chat"/></svg></div>
+  <span class="tag">Prompt 0 — 先交代資料與規則</span>
+<pre>你是 Google Apps Script 專家，接下來我會分段請你寫程式，請遵守：
+- 只用 Google Apps Script（SpreadsheetApp、HtmlService），不要用 Node.js 或 npm 套件
+- 每次都給我完整可貼上的程式碼，不要只給片段
+- 註解用繁體中文
+- 原始的三張分頁只能讀取，不能修改，結果一律寫到新分頁
+
+我的 Google 試算表有三張分頁：
+
+1.「交易記錄檔」A~F 欄：交易編號、Date、ID、Product_ID、Quantity、Amount
+   範例：86 | 20060101 | "92 " | 2842 | 1 | 45
+   注意：Date 是 20060101 這種 8 位數整數，不是日期；
+   ID 是文字且後面有空白；同一個交易編號會有多列（一列一個商品）；Amount 有 0 元的贈品。
+   共 3,077 列，1,815 張不重複訂單，200 位顧客，日期範圍 2006/1/1 到 2007/12/31。
+
+2.「客戶資料檔」A~E 欄：客戶ID、Gender、Age、Zipcode、Area
+   範例：3596 | 男 | 37 | 247 | 北區。共 200 列，客戶ID 是數字。
+
+3.「產品資料檔」A~D 欄：Product_ID、Product、Category_ID、Category
+   範例：2760 | 國際黑1號池 | 40301 | 一般電池。共 1,130 列。
+
+先回覆「了解」就好，等我下一個指令。</pre>
+</section>
+
+<!-- 16 Prompt 1 -->
+<section class="slide">
+  <div class="chapter"><i></i>建構一個基礎的會員系統</div>
+  <div class="head" style="margin-bottom:14px"><h2>Prompt 1 — 算出 R、F、M</h2><svg class="ill" style="width:110px;height:110px"><use href="#il-chat"/></svg></div>
+  <span class="tag">Prompt 1</span>
+<pre>請寫一個函式 calcRFM()：
+1. 讀取「交易記錄檔」，把 ID 去掉前後空白、Date 從 20060101 轉成真正的日期
+2. 以顧客為單位算出：最後購買日、F = 不重複交易編號的數量、M = Amount 總和
+3. R = 2008/1/1 減最後購買日的天數
+4. 寫到新分頁「customers_rfm」，欄位：客戶ID、最後購買日、R(天)、F(次)、M(元)，依 M 由大到小排序
+5. 另外加一個 onOpen()，在試算表上方加選單「RFM 分析」，裡面有「計算 RFM」可以執行 calcRFM
+
+<b>驗收標準：customers_rfm 應該有 200 列；客戶 1686 的 F 是 78、M 是 494330、R 是 3。</b>
+如果數字不對，最可能的原因是 F 用列數去算，或 ID 沒 trim。</pre>
+</section>
+
+<!-- 17 Prompt 2 -->
+<section class="slide">
+  <div class="chapter"><i></i>建構一個基礎的會員系統</div>
+  <div class="head" style="margin-bottom:14px"><h2>Prompt 2 — 五分位評分與客群規則</h2><svg class="ill" style="width:110px;height:110px"><use href="#il-chat"/></svg></div>
+  <span class="tag">Prompt 2</span>
+<pre>請擴充 calcRFM()，在算完 R、F、M 之後：
+1. 五分位評分：把 200 位顧客依 R 排序後平均切成五份，R 最小的那一份給 5 分、最大的給 1 分；
+   F 和 M 相反，最大的給 5 分。結果存成 R分、F分、M分，並組成三位數的 RFM 字串例如 "543"。
+2. 客群規則從分頁「config」讀取，格式是第 4 列標題、第 5 列起每列一條規則：
+   客群名稱 | R分數最小 | R分數最大 | F分數最小 | F分數最大 | M分數最小 | M分數最大 | 建議行動
+   規則由上往下比對，第一條符合的就套用，都不符合的顧客歸「一般客」。
+3. 請另外寫 initConfig()，自動建立 config 分頁並填入這六條規則（依序）：
+   VIP 冠軍客 4 5 4 5 4 5 專屬禮遇
+   忠誠客 1 5 4 5 3 5 會員升級
+   新客 4 5 1 2 1 5 歡迎禮
+   潛力客 3 5 3 5 1 5 加購優惠
+   沉睡客 1 2 3 5 1 5 喚醒簡訊
+   流失客 1 2 1 2 1 5 低成本挽回
+4. customers_rfm 新增欄位：R分、F分、M分、RFM、客群、建議行動
+5. 把 initConfig 也加進「RFM 分析」選單
+
+請給我完整的 Code.gs。</pre>
+</section>
+
+<!-- 18 Prompt 3 -->
+<section class="slide">
+  <div class="chapter"><i></i>建構一個基礎的會員系統</div>
+  <div class="head" style="margin-bottom:14px"><h2>Prompt 3 — 網頁儀表板</h2><svg class="ill" style="width:110px;height:110px"><use href="#il-chat"/></svg></div>
+  <span class="tag">Prompt 3</span>
+<pre>請做一個 Apps Script 網頁後台：
+1. Code.gs 加 doGet()，用 HtmlService 回傳 Index.html；
+   再加 getDashboardData()，讀 customers_rfm 回傳所有顧客陣列和各客群的人數與消費總額。
+2. Index.html 要有：
+   - 左邊：各客群人數的橫條圖（用 div 畫就好，不要用外部圖表套件），點客群可以篩選右邊名單
+   - 右邊：顧客表格，可以搜尋客戶ID、點欄位標題排序
+   - 一個「下載 CSV」按鈕，把目前篩選到的名單下載下來（CSV 開頭要加 BOM，Excel 才不會亂碼）
+3. 前端呼叫後端一律用 google.script.run.withSuccessHandler(...)，並處理錯誤
+4. 版面要能在手機上看，寬度小於 760px 時改成單欄
+5. 介面文字用繁體中文
+
+請分別給我完整的 Code.gs（包含前面所有函式）和完整的 Index.html。</pre>
+</section>
+
+<!-- 19 Prompt 4a -->
+<section class="slide">
+  <div class="chapter"><i></i>建構一個基礎的會員系統</div>
+  <div class="head" style="margin-bottom:14px"><h2>Prompt 4 — 顧客查詢分頁</h2><svg class="ill" style="width:110px;height:110px"><use href="#il-chat"/></svg></div>
+  <span class="tag">Prompt 4-1</span>
+<pre>請在後台加第二個分頁「顧客查詢」：
+1. Code.gs 加 getCustomerDetail(id)：
+   - 從客戶資料檔找基本資料，找不到要回傳清楚的訊息
+   - 從交易記錄檔篩出這位顧客的所有列，用 Product_ID 關聯產品資料檔拿到商品名稱和品類
+   - 以訂單為單位整理：日期、單號、商品清單（商品名、品類、數量、金額）、該單總金額
+   - 回傳：消費總額、購買次數（訂單數）、每單平均、累計件數、首購日、最後購買日、
+     依金額排序的前五個常買品類、訂單清單（新到舊），以及這位顧客在 customers_rfm 的客群
+2. Index.html 上方加分頁切換「儀表板 / 顧客查詢」，用 hash（#dashboard、#customer）切換
+3. 顧客查詢頁：一個輸入框 + 查詢按鈕（按 Enter 也要能查），結果顯示上面那些數字，
+   訂單用 &lt;details&gt; 做成可展開，展開後是商品明細表格
+4. 儀表板名單裡的客戶ID 改成連結，點了直接切到顧客查詢並帶入查詢</pre>
+</section>
+
+<!-- 20 Prompt 4b -->
+<section class="slide">
+  <div class="chapter"><i></i>建構一個基礎的會員系統</div>
+  <div class="head" style="margin-bottom:14px"><h2>Prompt 4 — 統計報表分頁</h2><svg class="ill" style="width:110px;height:110px"><use href="#il-chat"/></svg></div>
+  <span class="tag">Prompt 4-2</span>
+<pre>請在後台加第三個分頁「統計報表」：
+1. Code.gs 加 getStatsReport()：
+   - 先把交易記錄檔彙總成「一張訂單一列」：顧客ID、金額總和、數量總和、品項數
+   - 整體：訂單數、顧客數、總營收、每單平均金額、每單平均件數、每單平均品項數、每位顧客平均訂單數
+   - 各客群（依 customers_rfm 的客群）：顧客數、顧客占比、訂單數、營收、營收占比、
+     每單平均金額、每單平均件數、平均 F、平均 M、平均 R、依金額排序的前三個常買品類
+2. Index.html 的分頁切換加「統計報表」（#stats），第一次切進去才呼叫後端
+3. 頁面上半放整體數字的卡片，下半放各客群比較表，再用橫條圖畫各客群的每單平均金額和營收占比
+
+請給我完整的 Code.gs 和 Index.html。</pre>
+</section>
+
+<!-- 21 DEBUG -->
+<section class="slide">
+  <div class="chapter"><i></i>建構一個基礎的會員系統</div>
+  <div class="head"><h2>DEBUG<small>出錯時，把這三樣東西一起交給 AI</small></h2><svg class="ill"><use href="#il-bug"/></svg></div>
+  <div class="row">
+    <div class="col" style="flex:1">
+      <div class="card tight fill"><div class="num rose">1</div><h3>錯誤訊息</h3><p style="font-size:24px" class="muted">貼上執行記錄裡的紅字，或網頁上看到的訊息</p></div>
+      <div class="card tight fill"><div class="num rose">2</div><h3>出錯的程式碼</h3><p style="font-size:24px" class="muted">貼上那個函式</p></div>
+      <div class="card tight fill"><div class="num rose">3</div><h3>明確要什麼</h3><p style="font-size:24px" class="muted">意思、哪一行、修正後的完整函式</p></div>
+    </div>
+    <div style="flex:1.4;display:flex;flex-direction:column">
+      <span class="tag warm">Debug Prompt</span>
+<pre>我執行後出現這個錯誤：
+（貼上執行記錄裡的紅字，或網頁上看到的訊息）
+
+出錯的程式碼在這裡：
+（貼上那個函式）
+
+請告訴我：
+1. 這個錯誤是什麼意思
+2. 哪一行造成的
+3. 修正後的完整函式
+
+<b>不要改動其他沒問題的函式。</b></pre>
+    </div>
+  </div>
+</section>
+
+<!-- 22 結語 -->
+<section class="slide">
+  <div class="chapter"><i></i>結語</div>
+  <div class="head" style="margin-bottom:24px"><h2>今天你做了一件以前要花一個團隊做的事</h2><svg class="ill"><use href="#il-trophy"/></svg></div>
+  <div class="row" style="flex:0 0 auto;margin-bottom:28px">
+    <div class="card tight" style="flex:1"><p class="muted" style="font-size:24px">三小時前</p><p style="font-size:32px;font-weight:700">你手上只有三張看不懂的試算表。</p></div>
+    <div class="card teal-bg tight" style="flex:1"><p class="muted" style="font-size:24px">現在</p><p style="font-size:32px;font-weight:700">你有一個會自己算客群、能查任何一位顧客、能出報表的後台。</p></div>
+  </div>
+  <p style="font-size:32px;font-weight:700;margin-bottom:18px">你帶走的不是程式碼，是三個能力</p>
+  <div class="grid3">
+    <div class="card tight"><div class="num">1</div><h3>看穿資料的坑</h3><p style="font-size:24px">ID 的空白、不是日期的日期、重複的訂單列。以後拿到任何資料，你會先懷疑再相信。</p></div>
+    <div class="card tight"><div class="num">2</div><h3>把需求說給 AI 聽</h3><p style="font-size:24px">你已經寫過六個 prompt，知道要給結構、給坑、給驗收數字。這套方法換到 Excel、Python、任何工具都一樣。</p></div>
+    <div class="card tight"><div class="num">3</div><h3>從成品反推</h3><p style="font-size:24px">先看到後台長什麼樣，再拆回去理解，這比從零學語法快十倍。</p></div>
+  </div>
+</section>
+
+<!-- 23 回家後的行動 -->
+<section class="slide">
+  <div class="chapter"><i></i>結語</div>
+  <div class="head"><h2>回家後的幾個行動</h2><svg class="ill"><use href="#il-sprout"/></svg></div>
+  <div class="grid3" style="flex:0 0 auto;margin-bottom:34px">
+    <div class="card tight"><h3 class="teal">換成你的資料</h3><p style="font-size:24px">你打工的店、你社團的名單、你爸媽的客戶。欄位名稱換掉，Prompt 0 重寫一次，其他照跑。</p></div>
+    <div class="card tight"><h3 class="teal">改一條規則</h3><p style="font-size:24px">把 config 裡「沉睡客」的 R 分數改成 1 到 3，按重新計算，看看多了誰、少了誰，然後想一想哪個對。</p></div>
+    <div class="card tight"><h3 class="teal">多加一個分頁</h3><p style="font-size:24px">用 Prompt 4 的格式，請 AI 加「本月新客名單」或「品類銷售排行」。做出來的話，貼到群組給大家看。</p></div>
+  </div>
+  <div class="card amber-bg fill" style="display:flex;align-items:center">
+    <p class="quote">資料分析不是會不會寫程式的問題，<br>是你願不願意對一個數字多問一句<span class="amber">「真的嗎」</span>。</p>
+  </div>
+</section>
+
+</div>
+
+<div class="progress"><i id="bar"></i></div>
+<div class="hint">← → 或空白鍵切換　·　F 全螢幕</div>
+<div class="ctrl">
+  <button id="prev" aria-label="上一頁">‹</button>
+  <span class="counter" id="counter">1 / 1</span>
+  <button id="next" aria-label="下一頁">›</button>
+</div>
+
+<script>
+(function(){
+  const stage=document.getElementById('stage');
+  const slides=[...document.querySelectorAll('.slide')];
+  const bar=document.getElementById('bar'), counter=document.getElementById('counter');
+  let cur=0;
+  function fit(){
+    const s=Math.min(window.innerWidth/1920, window.innerHeight/1080);
+    stage.style.transform=`translate(-50%,-50%) scale(${s})`;
+  }
+  function go(n){
+    cur=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,i)=>s.classList.toggle('active',i===cur));
+    bar.style.width=((cur+1)/slides.length*100)+'%';
+    counter.textContent=(cur+1)+' / '+slides.length;
+    history.replaceState(null,'','#'+(cur+1));
+  }
+  document.getElementById('prev').onclick=()=>go(cur-1);
+  document.getElementById('next').onclick=()=>go(cur+1);
+  document.addEventListener('keydown',e=>{
+    if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();go(cur+1);}
+    else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();go(cur-1);}
+    else if(e.key==='Home'){go(0);}
+    else if(e.key==='End'){go(slides.length-1);}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}
+  });
+  let tx=null;
+  document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;},{passive:true});
+  document.addEventListener('touchend',e=>{
+    if(tx===null)return; const dx=e.changedTouches[0].clientX-tx; tx=null;
+    if(Math.abs(dx)>60) go(dx<0?cur+1:cur-1);
+  });
+  window.addEventListener('resize',fit);
+  fit();
+  go((parseInt(location.hash.slice(1))||1)-1);
+})();
+</script>
+</body>
+</html>
